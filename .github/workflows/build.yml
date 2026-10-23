@@ -1,0 +1,49 @@
+name: Build Data Rider APK
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get the files
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Set up Android tools
+        uses: android-actions/setup-android@v3
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: 8.9
+
+      - name: Unpack and build the app
+        run: |
+          if [ -f DataRider.zip ]; then unzip -q -o DataRider.zip; fi
+          cd DataRider
+          gradle assembleDebug --no-daemon --stacktrace
+
+      - name: Keep the APK as a download
+        uses: actions/upload-artifact@v4
+        with:
+          name: data-rider-apk
+          path: DataRider/app/build/outputs/apk/debug/app-debug.apk
+
+      - name: Publish the APK as a release (direct download)
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: build-${{ github.run_number }}
+          name: Data Rider build ${{ github.run_number }}
+          files: DataRider/app/build/outputs/apk/debug/app-debug.apk
