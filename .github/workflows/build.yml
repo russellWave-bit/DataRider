@@ -21,8 +21,8 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - name: Set up Android tools
-        uses: android-actions/setup-android@v3
+      - name: Accept Android licences
+        run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
@@ -41,7 +41,7 @@ jobs:
           name: data-rider-apk
           path: DataRider/app/build/outputs/apk/debug/app-debug.apk
 
-      - name: Publish the APK as a release (direct download)
+      - name: Publish the APK as a release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: build-${{ github.run_number }}
